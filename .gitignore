@@ -1,0 +1,106 @@
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# =========================
+# Entornos virtuales
+# =========================
+
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Variables de entorno / secretos
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+# IDE / Editores
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# =========================
+# Testing / Coverage
+# =========================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# =========================
+# Type checking / Linters
+# =========================
+
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Build / Packaging
+# =========================
+
+build/
+dist/
+*.spec.bak
+*.egg-info/
+
+# =========================
+# PyInstaller
+# =========================
+
+*.manifest
+*.pyi
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+# =========================
+# Base de datos local
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Datos locales
+# =========================
+
+data/local/
+data/tmp/
+
+# =========================
+# macOS
+# =========================
+
+.DS_Store
+
+# =========================
+# Archivos temporales
+# =========================
+
+*.tmp
+*.temp
+*.bak
+*~
