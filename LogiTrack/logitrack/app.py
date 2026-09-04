@@ -11,11 +11,14 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
+    QSplitter,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
+
 
 
 class MainWindow(QMainWindow):
@@ -43,7 +46,12 @@ class MainWindow(QMainWindow):
         # ENCABEZADO
         # =========================================================
 
-        header_layout = QHBoxLayout()
+        # HEADER
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(10)
 
         title = QLabel("LogiTrack Desktop")
         title.setStyleSheet(
@@ -57,13 +65,18 @@ class MainWindow(QMainWindow):
         header_layout.addStretch()
         header_layout.addWidget(subtitle)
 
-        main_layout.addLayout(header_layout)
+        header_widget.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
+
+        main_layout.addWidget(header_widget)
 
         # =========================================================
         # CONTENIDO PRINCIPAL
         # =========================================================
 
-        content_layout = QHBoxLayout()
+        splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # ---------------------------------------------------------
         # TABLA
@@ -89,7 +102,11 @@ class MainWindow(QMainWindow):
             QTableWidget.SelectionBehavior.SelectRows
         )
 
-        content_layout.addWidget(self.shipment_table, stretch=3)
+        self.shipment_table.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+
 
         # ---------------------------------------------------------
         # FORMULARIO
@@ -169,9 +186,20 @@ class MainWindow(QMainWindow):
 
         form_group.setLayout(form_layout)
 
-        content_layout.addWidget(form_group, stretch=1)
+        form_group.setMinimumWidth(300)
+        form_group.setMaximumWidth(400)
+        form_group.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding,
+        )
 
-        main_layout.addLayout(content_layout)
+        splitter.addWidget(self.shipment_table)
+        splitter.addWidget(form_group)
+
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 1)
+
+        main_layout.addWidget(splitter)
 
         # =========================================================
         # BARRA DE ESTADO
