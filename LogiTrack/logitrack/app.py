@@ -1,6 +1,9 @@
 import sys
 
 from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QThread
+from logitrack.services.shipment_service import ShipmentService
+from logitrack.services.worker import ShipmentWorker
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -173,14 +176,17 @@ class MainWindow(QMainWindow):
         save_button = QPushButton("Guardar")
         clear_button = QPushButton("Limpiar")
         search_button = QPushButton("Buscar")
+        async_button = QPushButton("Probar tarea asíncrona")
 
         save_button.clicked.connect(self._save_shipment)
         clear_button.clicked.connect(self._clear_form)
         search_button.clicked.connect(self._search_shipments)
+        async_button.clicked.connect(self._start_async_operation)
 
         buttons_layout.addWidget(save_button)
         buttons_layout.addWidget(clear_button)
         buttons_layout.addWidget(search_button)
+        buttons_layout.addWidget(async_button)
 
         form_layout.addRow(buttons_layout)
 
@@ -245,6 +251,35 @@ class MainWindow(QMainWindow):
             f"Envío registrado correctamente • "
             f"{len(self.shipments)} envío(s)"
         )
+
+    def _start_async_operation(self) -> None:
+        """Inicia una operación larga sin bloquear la interfaz."""
+        self.statusBar().showMessage("Procesando...")
+
+        self.async_thread = QThread()
+        self.async_worker = ShipmentWorker(ShipmentService())
+
+        self.async_worker.moveToThread(self.async_thread)
+
+        self.async_thread.started.connect(self.async_worker.run)
+        self.async_worker.finished.connect(self._async_operation_finished)
+        self.async_worker.error.connect(self._async_operation_error)
+
+        self.async_worker.finished.connect(self.async_thread.quit)
+        self.async_worker.error.connect(self.async_thread.quit)
+
+        self.async_thread.finished.connect(self.async_worker.deleteLater)
+        self.async_thread.finished.connect(self.async_thread.deleteLater)
+
+        self.async_thread.start()
+
+    def _async_operation_finished(self, message: str) -> None:
+        """Procesa el resultado de una operación exitosa."""
+        self.statusBar().showMessage(message)
+
+    def _async_operation_error(self, message: str) -> None:
+        """Procesa un error de la operación asíncrona."""
+        self.statusBar().showMessage(f"Error: {message}")
 
     def _clear_form(self) -> None:
         """Limpia el formulario."""
