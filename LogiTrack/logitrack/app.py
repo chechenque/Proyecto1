@@ -4,8 +4,12 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QThread
 from logitrack.services.shipment_service import ShipmentService
 from logitrack.services.worker import ShipmentWorker
+from logitrack.models.shipment_table_model import ShipmentTableModel
+from logitrack.ui.theme import get_theme
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
+    QPushButton,
     QComboBox,
     QFormLayout,
     QGroupBox,
@@ -16,8 +20,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSplitter,
-    QTableWidget,
-    QTableWidgetItem,
+    QTableView,
     QVBoxLayout,
     QWidget,
 )
@@ -57,16 +60,17 @@ class MainWindow(QMainWindow):
         header_layout.setSpacing(10)
 
         title = QLabel("LogiTrack Desktop")
-        title.setStyleSheet(
-            "font-size: 24px; font-weight: bold;"
-        )
-
         subtitle = QLabel("Gestión de envíos")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        self.theme_button = QPushButton("🌙 Modo oscuro")
+        self.theme_button.setCheckable(True)
+        self.theme_button.toggled.connect(self._toggle_theme)
 
         header_layout.addWidget(title)
         header_layout.addStretch()
         header_layout.addWidget(subtitle)
+        header_layout.addWidget(self.theme_button)
 
         header_widget.setSizePolicy(
             QSizePolicy.Policy.Expanding,
@@ -85,24 +89,39 @@ class MainWindow(QMainWindow):
         # TABLA
         # ---------------------------------------------------------
 
-        self.shipment_table = QTableWidget()
+        self.shipment_table = QTableView()
 
-        self.shipment_table.setColumnCount(4)
-        self.shipment_table.setHorizontalHeaderLabels(
-            [
-                "Destinatario",
-                "Dirección",
-                "Tipo",
-                "Estado",
-            ]
-        )
+        self.shipment_model = ShipmentTableModel(self.shipments)
+        self.shipment_table.setModel(self.shipment_model)
 
         self.shipment_table.setEditTriggers(
-            QTableWidget.EditTrigger.NoEditTriggers
+            QTableView.EditTrigger.NoEditTriggers
         )
 
         self.shipment_table.setSelectionBehavior(
-            QTableWidget.SelectionBehavior.SelectRows
+            QTableView.SelectionBehavior.SelectRows
+        )
+        self.shipment_table.setSortingEnabled(True)
+        self.shipment_table.setAlternatingRowColors(True)
+
+        self.shipment_table.horizontalHeader().setStretchLastSection(True)
+
+        header = self.shipment_table.horizontalHeader()
+        header.setSectionResizeMode(
+            0,
+            header.ResizeMode.Stretch,
+        )
+        header.setSectionResizeMode(
+            1,
+            header.ResizeMode.Stretch,
+        )
+        header.setSectionResizeMode(
+            2,
+            header.ResizeMode.ResizeToContents,
+        )
+        header.setSectionResizeMode(
+            3,
+            header.ResizeMode.ResizeToContents,
         )
 
         self.shipment_table.setSizePolicy(
@@ -117,6 +136,8 @@ class MainWindow(QMainWindow):
 
         form_group = QGroupBox("Nuevo envío")
         form_layout = QFormLayout()
+        form_layout.setVerticalSpacing(12)
+        form_layout.setHorizontalSpacing(10)
 
         self.recipient_input = QLineEdit()
         self.recipient_input.setPlaceholderText(
@@ -214,6 +235,18 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(
             "Listo • 0 envíos registrados"
         )
+
+    def _toggle_theme(self, checked: bool) -> None:
+        """Cambia entre el tema claro y oscuro."""
+        app = QApplication.instance()
+
+        if app is not None:
+            app.setStyleSheet(get_theme(dark=checked))
+
+        if checked:
+            self.theme_button.setText("☀️ Modo claro")
+        else:
+            self.theme_button.setText("🌙 Modo oscuro")
 
     def _save_shipment(self) -> None:
         """Registra un envío temporalmente en memoria."""
@@ -315,49 +348,17 @@ class MainWindow(QMainWindow):
         )
 
     def _refresh_table(
-        self,
-        shipments: list[dict[str, str]] | None = None,
+            self,
+            shipments: list[dict[str, str]] | None = None,
     ) -> None:
-        """Actualiza la tabla con los envíos disponibles."""
+        data = self.shipments if shipments is None else shipments
 
-        data = (
-            self.shipments
-            if shipments is None
-            else shipments
-        )
-
-        self.shipment_table.setRowCount(len(data))
-
-        for row, shipment in enumerate(data):
-            self.shipment_table.setItem(
-                row,
-                0,
-                QTableWidgetItem(shipment["recipient"]),
-            )
-
-            self.shipment_table.setItem(
-                row,
-                1,
-                QTableWidgetItem(shipment["address"]),
-            )
-
-            self.shipment_table.setItem(
-                row,
-                2,
-                QTableWidgetItem(shipment["type"]),
-            )
-
-            self.shipment_table.setItem(
-                row,
-                3,
-                QTableWidgetItem(shipment["status"]),
-            )
+        self.shipment_model.update_shipments(data)
 
 
 def run() -> None:
-    """Inicia la aplicación."""
-
     app = QApplication(sys.argv)
+    app.setStyleSheet(get_theme())
 
     window = MainWindow()
     window.show()
