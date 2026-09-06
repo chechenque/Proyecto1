@@ -1,8 +1,5 @@
-import time
-
-
-class ShipmentService:
-    """Servicios relacionados con la gestión de envíos."""
+class ShipmentController:
+    """Controlador de las operaciones relacionadas con envíos."""
 
     def __init__(self) -> None:
         self.shipments: list[dict[str, str]] = []
@@ -13,8 +10,17 @@ class ShipmentService:
         address: str,
         shipment_type: str,
         status: str,
-    ) -> dict[str, str]:
-        """Crea y almacena un envío."""
+    ) -> tuple[bool, str]:
+        """Valida y registra un nuevo envío."""
+
+        recipient = recipient.strip()
+        address = address.strip()
+
+        if not recipient:
+            return False, "El destinatario es obligatorio."
+
+        if not address:
+            return False, "La dirección es obligatoria."
 
         shipment = {
             "recipient": recipient,
@@ -25,7 +31,7 @@ class ShipmentService:
 
         self.shipments.append(shipment)
 
-        return shipment
+        return True, "Envío registrado correctamente."
 
     def search_shipments(
         self,
@@ -45,7 +51,3 @@ class ShipmentService:
             or search_text in shipment["address"].lower()
         ]
 
-    def simulate_long_operation(self) -> str:
-        """Simula una operación que tarda algunos segundos."""
-        time.sleep(5)
-        return "Operación completada correctamente."

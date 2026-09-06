@@ -5,6 +5,7 @@ from PyQt6.QtCore import QThread
 from logitrack.services.shipment_service import ShipmentService
 from logitrack.services.worker import ShipmentWorker
 from logitrack.models.shipment_table_model import ShipmentTableModel
+from logitrack.controllers.shipment_controller import ShipmentController
 from logitrack.ui.theme import get_theme
 from PyQt6.QtWidgets import (
     QApplication,
@@ -36,7 +37,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("LogiTrack Desktop")
         self.resize(1100, 700)
 
-        self.shipments: list[dict[str, str]] = []
+        self.shipment_controller = ShipmentController()
+        self.shipments = self.shipment_controller.shipments
 
         self._create_ui()
 
@@ -249,40 +251,29 @@ class MainWindow(QMainWindow):
             self.theme_button.setText("🌙 Modo oscuro")
 
     def _save_shipment(self) -> None:
-        """Registra un envío temporalmente en memoria."""
+        """Solicita al controlador la creación de un envío."""
+        success, message = self.shipment_controller.create_shipment(
+            self.recipient_input.text(),
+            self.address_input.text(),
+            self.type_combo.currentText(),
+            self.status_combo.currentText(),
+        )
 
-        recipient = self.recipient_input.text().strip()
-        address = self.address_input.text().strip()
+        if not success:
+            self.statusBar().showMessage(f"Error: {message}")
 
-        if not recipient:
-            self.statusBar().showMessage(
-                "Error: el destinatario es obligatorio."
-            )
-            self.recipient_input.setFocus()
+            if not self.recipient_input.text().strip():
+                self.recipient_input.setFocus()
+            else:
+                self.address_input.setFocus()
+
             return
-
-        if not address:
-            self.statusBar().showMessage(
-                "Error: la dirección es obligatoria."
-            )
-            self.address_input.setFocus()
-            return
-
-        shipment = {
-            "recipient": recipient,
-            "address": address,
-            "type": self.type_combo.currentText(),
-            "status": self.status_combo.currentText(),
-        }
-
-        self.shipments.append(shipment)
 
         self._refresh_table()
         self._clear_form()
 
         self.statusBar().showMessage(
-            f"Envío registrado correctamente • "
-            f"{len(self.shipments)} envío(s)"
+            f"{message} • {len(self.shipments)} envío(s)"
         )
 
     def _start_async_operation(self) -> None:
@@ -326,26 +317,26 @@ class MainWindow(QMainWindow):
         self.recipient_input.setFocus()
 
     def _search_shipments(self) -> None:
-        """Busca envíos por destinatario o dirección."""
+        """Solicita al controlador la búsqueda de envíos."""
+        recipient_text = self.recipient_input.text().strip()
+        address_text = self.address_input.text().strip()
 
-        search_text = self.recipient_input.text().strip().lower()
+        search_text = recipient_text or address_text
 
-        if not search_text:
-            self._refresh_table()
-            return
-
-        filtered = [
-            shipment
-            for shipment in self.shipments
-            if search_text in shipment["recipient"].lower()
-            or search_text in shipment["address"].lower()
-        ]
+        filtered = self.shipment_controller.search_shipments(
+            search_text
+        )
 
         self._refresh_table(filtered)
 
-        self.statusBar().showMessage(
-            f"{len(filtered)} resultado(s) encontrado(s)"
-        )
+        if search_text:
+            self.statusBar().showMessage(
+                f"{len(filtered)} resultado(s) encontrado(s)"
+            )
+        else:
+            self.statusBar().showMessage(
+                f"{len(filtered)} envío(s) registrado(s)"
+            )
 
     def _refresh_table(
             self,
