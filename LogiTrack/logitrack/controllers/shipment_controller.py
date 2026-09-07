@@ -1,8 +1,11 @@
+from logitrack.services.shipment_service import ShipmentService
+
+
 class ShipmentController:
     """Controlador de las operaciones relacionadas con envíos."""
 
     def __init__(self) -> None:
-        self.shipments: list[dict[str, str]] = []
+        self.service = ShipmentService()
 
     def create_shipment(
         self,
@@ -22,14 +25,12 @@ class ShipmentController:
         if not address:
             return False, "La dirección es obligatoria."
 
-        shipment = {
-            "recipient": recipient,
-            "address": address,
-            "type": shipment_type,
-            "status": status,
-        }
-
-        self.shipments.append(shipment)
+        self.service.create_shipment(
+            recipient,
+            address,
+            shipment_type,
+            status,
+        )
 
         return True, "Envío registrado correctamente."
 
@@ -39,15 +40,12 @@ class ShipmentController:
     ) -> list[dict[str, str]]:
         """Busca envíos por destinatario o dirección."""
 
-        search_text = search_text.strip().lower()
+        return self.service.search_shipments(search_text)
 
-        if not search_text:
-            return self.shipments.copy()
+    def get_shipments(self) -> list[dict[str, str]]:
+        """Obtiene todos los envíos registrados."""
+        return self.service.search_shipments("")
 
-        return [
-            shipment
-            for shipment in self.shipments
-            if search_text in shipment["recipient"].lower()
-            or search_text in shipment["address"].lower()
-        ]
-
+    def get_service(self) -> ShipmentService:
+        """Devuelve el servicio utilizado por el controlador."""
+        return self.service
