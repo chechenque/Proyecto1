@@ -4,8 +4,15 @@ from logitrack.services.shipment_service import ShipmentService
 class ShipmentController:
     """Controlador de las operaciones relacionadas con envíos."""
 
-    def __init__(self) -> None:
-        self.service = ShipmentService()
+    def __init__(
+            self,
+            service: ShipmentService | None = None,
+    ) -> None:
+        self.service = (
+            service
+            if service is not None
+            else ShipmentService()
+        )
 
     def create_shipment(
         self,
