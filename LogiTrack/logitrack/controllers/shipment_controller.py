@@ -1,4 +1,5 @@
 from logitrack.services.shipment_service import ShipmentService
+from pydantic import ValidationError
 
 
 class ShipmentController:
@@ -15,29 +16,33 @@ class ShipmentController:
         )
 
     def create_shipment(
-        self,
-        recipient: str,
-        address: str,
-        shipment_type: str,
-        status: str,
+            self,
+            recipient: str,
+            address: str,
+            shipment_type: str,
+            status: str,
     ) -> tuple[bool, str]:
-        """Valida y registra un nuevo envío."""
+        """Valida y crea un envío."""
 
-        recipient = recipient.strip()
-        address = address.strip()
+        try:
+            self.service.create_shipment(
+                recipient,
+                address,
+                shipment_type,
+                status,
+            )
+        except ValidationError as exc:
+            first_error = exc.errors()[0]
+            field = first_error["loc"][0]
+            message = str(first_error["msg"])
 
-        if not recipient:
-            return False, "El destinatario es obligatorio."
+            if field == "recipient":
+                return False, "El destinatario es obligatorio."
 
-        if not address:
-            return False, "La dirección es obligatoria."
+            if field == "address":
+                return False, "La dirección es obligatoria."
 
-        self.service.create_shipment(
-            recipient,
-            address,
-            shipment_type,
-            status,
-        )
+            return False, message
 
         return True, "Envío registrado correctamente."
 
@@ -56,3 +61,13 @@ class ShipmentController:
     def get_service(self) -> ShipmentService:
         """Devuelve el servicio utilizado por el controlador."""
         return self.service
+
+    def get_location_by_postal_code(
+        self,
+        postal_code: str,
+    ) -> dict[str, str]:
+        """Consulta la ubicación de un código postal."""
+
+        return self.service.get_location_by_postal_code(
+            postal_code
+        )

@@ -75,3 +75,24 @@ def test_create_shipment_success(
 
     assert len(shipments) == 1
     assert shipments[0]["recipient"] == "Ana López"
+
+def test_get_location_by_postal_code() -> None:
+    class FakeService:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            assert postal_code == "01000"
+            return {
+                "city": "Álvaro Obregón",
+                "state": "Ciudad de México",
+            }
+
+    controller = ShipmentController(FakeService())
+
+    result = controller.get_location_by_postal_code("01000")
+
+    assert result == {
+        "city": "Álvaro Obregón",
+        "state": "Ciudad de México",
+    }

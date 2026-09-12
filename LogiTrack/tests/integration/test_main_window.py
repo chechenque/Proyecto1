@@ -1,5 +1,6 @@
 import pytest
 from PyQt6.QtWidgets import QApplication
+from pathlib import Path
 
 from logitrack.controllers.shipment_controller import (
     ShipmentController,
@@ -321,6 +322,72 @@ def test_main_window_async_operation_error(
     assert (
         window.statusBar().currentMessage()
         == "Error: Error de conexión"
+    )
+
+    window.close()
+
+def test_main_window_autocompletes_address_from_postal_code(
+    tmp_path: Path,
+    qapp: QApplication,
+) -> None:
+    window = create_window(tmp_path, qapp)
+
+    window.postal_code_input.setText("01000")
+
+    window._postal_code_search_finished(
+        {
+            "city": "Álvaro Obregón",
+            "state": "Ciudad de México",
+        }
+    )
+
+    assert (
+        window.address_input.text()
+        == "Álvaro Obregón, Ciudad de México"
+    )
+
+    window.close()
+
+def test_main_window_does_not_overwrite_existing_address(
+    tmp_path: Path,
+    qapp: QApplication,
+) -> None:
+    window = create_window(tmp_path, qapp)
+
+    window.address_input.setText(
+        "Av. Reforma 123"
+    )
+
+    window._postal_code_search_finished(
+        {
+            "city": "Álvaro Obregón",
+            "state": "Ciudad de México",
+        }
+    )
+
+    assert (
+        window.address_input.text()
+        == "Av. Reforma 123"
+    )
+
+    window.close()
+
+def test_main_window_postal_code_search_error(
+    tmp_path: Path,
+    qapp: QApplication,
+) -> None:
+    window = create_window(tmp_path, qapp)
+
+    window.postal_code_button.setEnabled(False)
+
+    window._postal_code_search_error(
+        "Código postal no encontrado"
+    )
+
+    assert window.postal_code_button.isEnabled() is True
+    assert (
+        window.statusBar().currentMessage()
+        == "Error: Código postal no encontrado"
     )
 
     window.close()

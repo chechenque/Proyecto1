@@ -1,5 +1,6 @@
 from pathlib import Path
-
+import httpx
+from logitrack.services.address_api_client import AddressApiClient
 from logitrack.services.shipment_service import ShipmentService
 
 
@@ -58,3 +59,36 @@ def test_service_searches_shipments(
 
     assert len(results) == 1
     assert results[0]["recipient"] == "Laura Martínez"
+
+def test_get_location_by_postal_code(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "places": [
+                    {
+                        "place name": "Álvaro Obregón",
+                        "state": "Ciudad de México",
+                    }
+                ],
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = httpx.Client(transport=transport)
+
+    address_api_client = AddressApiClient(client)
+
+    service = ShipmentService(
+        tmp_path / "test.db",
+        address_api_client,
+    )
+
+    result = service.get_location_by_postal_code("01000")
+
+    assert result == {
+        "city": "Álvaro Obregón",
+        "state": "Ciudad de México",
+    }
+
+    address_api_client.close()

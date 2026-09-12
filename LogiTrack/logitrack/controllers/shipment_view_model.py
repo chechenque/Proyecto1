@@ -71,3 +71,14 @@ class ShipmentViewModel(QObject):
             self.refresh()
 
         return success, message
+
+    def lookup_postal_code(
+            self,
+            postal_code: str,
+    ) -> dict[str, str]:
+        """Consulta un código postal a través del servicio."""
+
+        return self.controller.get_location_by_postal_code(
+            postal_code
+        )
+

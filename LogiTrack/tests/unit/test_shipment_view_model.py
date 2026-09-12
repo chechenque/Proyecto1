@@ -113,3 +113,31 @@ def test_view_model_refresh(
 
     assert len(view_model.shipment_model.shipments) == 2
     assert view_model.count() == 2
+
+def test_get_location_by_postal_code() -> None:
+    class FakeController:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            assert postal_code == "01000"
+            return {
+                "city": "Álvaro Obregón",
+                "state": "Ciudad de México",
+            }
+
+    controller = FakeController()
+
+    shipment_model = ShipmentTableModel([])
+
+    view_model = ShipmentViewModel(
+        controller,
+        shipment_model,
+    )
+
+    result = view_model.lookup_postal_code("01000")
+
+    assert result == {
+        "city": "Álvaro Obregón",
+        "state": "Ciudad de México",
+    }

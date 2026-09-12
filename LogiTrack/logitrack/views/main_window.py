@@ -1,6 +1,7 @@
 from PyQt6.QtCore import Qt, QThread
 from logitrack.ui.theme import get_theme
 from logitrack.services.worker import ShipmentWorker
+from logitrack.services.postal_code_worker import PostalCodeWorker
 from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
@@ -116,6 +117,11 @@ class MainWindow(QMainWindow):
             "Dirección de entrega"
         )
 
+        self.postal_code_input = QLineEdit()
+        self.postal_code_input.setPlaceholderText(
+            "Código postal"
+        )
+
         self.type_combo = QComboBox()
         self.type_combo.addItems(
             ["Paquete", "Documento", "Carga"]
@@ -135,6 +141,10 @@ class MainWindow(QMainWindow):
             self.address_input,
         )
         form_layout.addRow(
+            "Código postal:",
+            self.postal_code_input,
+        )
+        form_layout.addRow(
             "Tipo:",
             self.type_combo,
         )
@@ -148,6 +158,7 @@ class MainWindow(QMainWindow):
         self.save_button = QPushButton("Guardar")
         self.clear_button = QPushButton("Limpiar")
         self.search_button = QPushButton("Buscar")
+        self.postal_code_button = QPushButton("Consultar CP")
         self.async_button = QPushButton(
             "Probar tarea asíncrona"
         )
@@ -157,6 +168,9 @@ class MainWindow(QMainWindow):
         buttons_layout.addWidget(self.save_button)
         buttons_layout.addWidget(self.clear_button)
         buttons_layout.addWidget(self.search_button)
+        buttons_layout.addWidget(
+            self.postal_code_button
+        )
 
         form_layout.addRow(buttons_layout)
         form_layout.addRow(self.async_button)
@@ -188,10 +202,100 @@ class MainWindow(QMainWindow):
         self.search_button.clicked.connect(self._search_shipments)
         self.clear_button.clicked.connect(self._clear_form)
         self.theme_button.toggled.connect(self._toggle_theme)
+        self.postal_code_button.clicked.connect(
+            self._search_postal_code
+        )
         self.async_button.clicked.connect(
 
             self._start_async_operation
 
+        )
+
+    def _search_postal_code(self) -> None:
+        """Consulta la ubicación del código postal."""
+
+        postal_code = self.postal_code_input.text().strip()
+
+        if not postal_code:
+            self.statusBar().showMessage(
+                "Ingresa un código postal."
+            )
+            return
+
+        self.postal_code_button.setEnabled(False)
+        self.statusBar().showMessage(
+            "Consultando código postal..."
+        )
+
+        self.postal_code_thread = QThread()
+
+        self.postal_code_worker = PostalCodeWorker(
+            postal_code,
+            self.view_model.lookup_postal_code,
+        )
+
+        self.postal_code_worker.moveToThread(
+            self.postal_code_thread
+        )
+
+        self.postal_code_thread.started.connect(
+            self.postal_code_worker.run
+        )
+
+        self.postal_code_worker.finished.connect(
+            self._postal_code_search_finished
+        )
+
+        self.postal_code_worker.error.connect(
+            self._postal_code_search_error
+        )
+
+        self.postal_code_worker.finished.connect(
+            self.postal_code_thread.quit
+        )
+
+        self.postal_code_worker.error.connect(
+            self.postal_code_thread.quit
+        )
+
+        self.postal_code_thread.finished.connect(
+            self.postal_code_worker.deleteLater
+        )
+
+        self.postal_code_thread.finished.connect(
+            self.postal_code_thread.deleteLater
+        )
+
+        self.postal_code_thread.start()
+
+    def _postal_code_search_finished(
+            self,
+            result: dict,
+    ) -> None:
+        """Procesa el resultado de la consulta del código postal."""
+
+        self.postal_code_button.setEnabled(True)
+
+        location = (
+            f"{result['city']}, "
+            f"{result['state']}"
+        )
+
+        if not self.address_input.text().strip():
+            self.address_input.setText(location)
+
+        self.statusBar().showMessage(location)
+
+    def _postal_code_search_error(
+            self,
+            message: str,
+    ) -> None:
+        """Procesa un error de la consulta del código postal."""
+
+        self.postal_code_button.setEnabled(True)
+
+        self.statusBar().showMessage(
+            f"Error: {message}"
         )
 
     def _save_shipment(self) -> None:
@@ -250,7 +354,7 @@ class MainWindow(QMainWindow):
 
         self.recipient_input.clear()
         self.address_input.clear()
-
+        self.postal_code_input.clear()
         self.type_combo.setCurrentIndex(0)
         self.status_combo.setCurrentIndex(0)
 

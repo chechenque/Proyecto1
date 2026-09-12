@@ -1,5 +1,8 @@
 from logitrack.models.database import Database
 from logitrack.models.shipment import Shipment
+import sqlite3
+
+from logitrack.models.shipment import Shipment
 
 
 class ShipmentRepository:
@@ -7,6 +10,20 @@ class ShipmentRepository:
 
     def __init__(self, database: Database) -> None:
         self.database = database
+
+    def _row_to_shipment(
+            self,
+            row: sqlite3.Row,
+    ) -> Shipment:
+        """Convierte una fila SQLite en un modelo Shipment."""
+
+        return Shipment(
+            id=row["id"],
+            recipient=row["recipient"],
+            address=row["address"],
+            shipment_type=row["shipment_type"],
+            status=row["status"],
+        )
 
     def create(
             self,
@@ -70,13 +87,14 @@ class ShipmentRepository:
 
         return [
             {
-                "id": str(row["id"]),
-                "recipient": row["recipient"],
-                "address": row["address"],
-                "type": row["shipment_type"],
-                "status": row["status"],
+                "id": str(shipment.id),
+                "recipient": shipment.recipient,
+                "address": shipment.address,
+                "type": shipment.shipment_type,
+                "status": shipment.status,
             }
             for row in rows
+            for shipment in [self._row_to_shipment(row)]
         ]
 
     def search(
@@ -111,11 +129,12 @@ class ShipmentRepository:
 
         return [
             {
-                "id": str(row["id"]),
-                "recipient": row["recipient"],
-                "address": row["address"],
-                "type": row["shipment_type"],
-                "status": row["status"],
+                "id": str(shipment.id),
+                "recipient": shipment.recipient,
+                "address": shipment.address,
+                "type": shipment.shipment_type,
+                "status": shipment.status,
             }
             for row in rows
+            for shipment in [self._row_to_shipment(row)]
         ]

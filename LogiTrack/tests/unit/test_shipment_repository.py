@@ -63,3 +63,45 @@ def test_search_shipments(tmp_path: Path) -> None:
 
     assert len(address_results) == 1
     assert address_results[0]["recipient"] == "Carlos Pérez"
+
+def test_row_to_shipment(
+    tmp_path: Path,
+) -> None:
+    """Una fila SQLite debe convertirse en un Shipment válido."""
+
+    database = Database(tmp_path / "test.db")
+    database.initialize()
+
+    repository = ShipmentRepository(database)
+
+    with database.connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO shipments (
+                recipient,
+                address,
+                shipment_type,
+                status
+            )
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                "Ana López",
+                "Av. Reforma 123",
+                "Nacional",
+                "Pendiente",
+            ),
+        )
+        connection.commit()
+
+        row = connection.execute(
+            "SELECT * FROM shipments"
+        ).fetchone()
+
+    shipment = repository._row_to_shipment(row)
+
+    assert shipment.id is not None
+    assert shipment.recipient == "Ana López"
+    assert shipment.address == "Av. Reforma 123"
+    assert shipment.shipment_type == "Nacional"
+    assert shipment.status == "Pendiente"
