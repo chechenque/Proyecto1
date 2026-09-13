@@ -23,7 +23,12 @@ from PyQt6.QtWidgets import (
 class MainWindow(QMainWindow):
     """Ventana principal de LogiTrack Desktop."""
 
-    def __init__(self, controller, view_model) -> None:
+    def __init__(
+            self,
+            controller,
+            view_model,
+            offline_view_model,
+    ) -> None:
         super().__init__()
 
         self.setWindowTitle("LogiTrack Desktop")
@@ -31,11 +36,18 @@ class MainWindow(QMainWindow):
 
         self.controller = controller
         self.view_model = view_model
+        self.offline_view_model = offline_view_model
 
         self._create_ui()
 
         self.shipment_table.setModel(
             self.view_model.shipment_model
+        )
+
+        self._update_offline_status()
+
+        self.offline_view_model.operations_changed.connect(
+            self._update_offline_status
         )
 
     def _create_ui(self) -> None:
@@ -56,9 +68,13 @@ class MainWindow(QMainWindow):
         title = QLabel("LogiTrack Desktop")
         subtitle = QLabel("Gestión de envíos")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.offline_status_label = QLabel(
+            "Pendientes offline: 0"
+        )
 
         header_layout.addWidget(title)
         header_layout.addStretch()
+        header_layout.addWidget(self.offline_status_label)
         header_layout.addWidget(subtitle)
 
         header_widget.setSizePolicy(
@@ -294,8 +310,10 @@ class MainWindow(QMainWindow):
 
         self.postal_code_button.setEnabled(True)
 
+        self.offline_view_model.refresh()
+
         self.statusBar().showMessage(
-            f"Error: {message}"
+            "Sin conexión. Consulta guardada para sincronización."
         )
 
     def _save_shipment(self) -> None:
@@ -448,4 +466,13 @@ class MainWindow(QMainWindow):
         self.async_button.setEnabled(True)
         self.statusBar().showMessage(
             f"Error: {message}"
+        )
+
+    def _update_offline_status(self) -> None:
+        """Actualiza el contador de operaciones offline pendientes."""
+
+        pending = self.offline_view_model.count_pending()
+
+        self.offline_status_label.setText(
+            f"Pendientes offline: {pending}"
         )

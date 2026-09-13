@@ -1,5 +1,6 @@
 from pathlib import Path
 import httpx
+import pytest
 from logitrack.services.address_api_client import AddressApiClient
 from logitrack.services.shipment_service import ShipmentService
 
@@ -92,3 +93,50 @@ def test_get_location_by_postal_code(tmp_path: Path) -> None:
     }
 
     address_api_client.close()
+
+def test_queue_postal_code_lookup(tmp_path: Path) -> None:
+    service = ShipmentService(
+        tmp_path / "test.db",
+    )
+
+    service.queue_postal_code_lookup("01000")
+
+    pending = (
+        service.offline_operation_service
+        .get_pending_operations()
+    )
+
+    assert len(pending) == 1
+    assert pending[0].operation == "postal_code_lookup"
+    assert pending[0].payload == "01000"
+    assert pending[0].status == "PENDING"
+
+def test_get_location_by_postal_code_queues_on_connection_error(
+    tmp_path: Path,
+) -> None:
+    class FakeAddressApiClient:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            raise ConnectionError(
+                "No fue posible conectarse al servicio."
+            )
+
+    service = ShipmentService(
+        tmp_path / "test.db",
+        address_api_client=FakeAddressApiClient(),  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(ConnectionError):
+        service.get_location_by_postal_code("01000")
+
+    pending = (
+        service.offline_operation_service
+        .get_pending_operations()
+    )
+
+    assert len(pending) == 1
+    assert pending[0].operation == "postal_code_lookup"
+    assert pending[0].payload == "01000"
+    assert pending[0].status == "PENDING"

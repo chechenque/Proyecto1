@@ -2,6 +2,8 @@ import pytest
 from PyQt6.QtWidgets import QApplication
 from pathlib import Path
 
+from logitrack.controllers.offline_operation_controller import OfflineOperationController
+from logitrack.controllers.offline_operation_view_model import OfflineOperationViewModel
 from logitrack.controllers.shipment_controller import (
     ShipmentController,
 )
@@ -50,9 +52,18 @@ def create_window(
         model,
     )
 
+    offline_controller = OfflineOperationController(
+        service=service.offline_operation_service,
+    )
+
+    offline_view_model = OfflineOperationViewModel(
+        offline_controller,
+    )
+
     return MainWindow(
         controller,
         view_model,
+        offline_view_model,
     )
 
 
@@ -386,8 +397,49 @@ def test_main_window_postal_code_search_error(
 
     assert window.postal_code_button.isEnabled() is True
     assert (
-        window.statusBar().currentMessage()
-        == "Error: Código postal no encontrado"
+            window.statusBar().currentMessage()
+            == "Sin conexión. Consulta guardada para sincronización."
     )
 
     window.close()
+
+def test_postal_code_search_error_shows_offline_message(
+    tmp_path: Path,
+    qapp: QApplication,
+) -> None:
+    window = create_window(tmp_path, qapp)
+
+    window.postal_code_input.setText("99999")
+
+    window._postal_code_search_error(
+        "No fue posible conectarse al servicio."
+    )
+
+    assert (
+        window.statusBar().currentMessage()
+        == "Sin conexión. Consulta guardada para sincronización."
+    )
+    assert window.postal_code_input.text() == "99999"
+
+def test_main_window_updates_offline_pending_count(
+    tmp_path: Path,
+    qapp: QApplication,
+) -> None:
+    window = create_window(tmp_path, qapp)
+
+    assert (
+        window.offline_status_label.text()
+        == "Pendientes offline: 0"
+    )
+
+    window.offline_view_model.controller.service.queue_operation(
+        operation="postal_code_lookup",
+        payload="01000",
+    )
+
+    window.offline_view_model.refresh()
+
+    assert (
+        window.offline_status_label.text()
+        == "Pendientes offline: 1"
+    )

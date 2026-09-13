@@ -48,3 +48,8 @@ class OfflineOperationViewModel(QObject):
 
         self.controller.mark_as_synced(operation_id)
         self.operations_changed.emit()
+
+    def refresh(self) -> None:
+        """Notifica que las operaciones pendientes deben actualizarse."""
+
+        self.operations_changed.emit()

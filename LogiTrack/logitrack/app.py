@@ -3,6 +3,8 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QThread
 
+from logitrack.controllers.offline_operation_controller import OfflineOperationController
+from logitrack.controllers.offline_operation_view_model import OfflineOperationViewModel
 from logitrack.controllers.shipment_view_model import ShipmentViewModel
 from logitrack.services.shipment_service import ShipmentService
 from logitrack.services.worker import ShipmentWorker
@@ -49,10 +51,18 @@ def run() -> None:
 
     )
 
+    offline_controller = OfflineOperationController()
+
+    offline_view_model = OfflineOperationViewModel(
+        offline_controller,
+    )
+
     window = MainWindow(
         controller,
         view_model,
+        offline_view_model,
     )
+
     window.show()
 
     sys.exit(app.exec())
