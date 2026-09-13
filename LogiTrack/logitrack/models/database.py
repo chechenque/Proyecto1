@@ -37,4 +37,16 @@ class Database:
                 """
             )
 
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS offline_operations
+                (
+                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    operation TEXT NOT NULL,
+                    payload   TEXT NOT NULL,
+                    status    TEXT NOT NULL
+                )
+                """
+            )
+
             connection.commit()
