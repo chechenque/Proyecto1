@@ -46,3 +46,15 @@ class OfflineOperationService:
         """Marca una operación como sincronizada."""
 
         self.repository.mark_as_synced(operation_id)
+
+    def sync_operation(
+            self,
+            operation: OfflineOperation,
+    ) -> bool:
+        """Marca una operación como sincronizada."""
+
+        if operation.id is None:
+            return False
+
+        self.mark_as_synced(operation.id)
+        return True

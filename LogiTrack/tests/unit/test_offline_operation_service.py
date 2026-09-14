@@ -52,3 +52,18 @@ def test_mark_as_synced(tmp_path: Path) -> None:
     pending = service.get_pending_operations()
 
     assert pending == []
+
+def test_sync_operation_marks_operation_as_synced(
+    tmp_path: Path,
+) -> None:
+    service = OfflineOperationService(
+        tmp_path / "test.db",
+    )
+
+    operation = service.queue_operation(
+        operation="postal_code_lookup",
+        payload="01000",
+    )
+
+    assert service.sync_operation(operation) is True
+    assert service.get_pending_operations() == []

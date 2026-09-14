@@ -140,3 +140,114 @@ def test_get_location_by_postal_code_queues_on_connection_error(
     assert pending[0].operation == "postal_code_lookup"
     assert pending[0].payload == "01000"
     assert pending[0].status == "PENDING"
+
+def test_queue_postal_code_lookup_emits_signal(
+    tmp_path: Path,
+) -> None:
+    service = ShipmentService(
+        tmp_path / "test.db",
+    )
+
+    emitted = []
+
+    service.offline_operation_queued.connect(
+        lambda: emitted.append(True)
+    )
+
+    service.queue_postal_code_lookup("01000")
+
+    assert emitted == [True]
+
+def test_get_location_by_postal_code_emits_signal_on_connection_error(
+    tmp_path: Path,
+) -> None:
+    class FakeAddressApiClient:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            raise ConnectionError(
+                "No fue posible conectarse al servicio."
+            )
+
+    service = ShipmentService(
+        tmp_path / "test.db",
+        address_api_client=FakeAddressApiClient(),  # type: ignore[arg-type]
+    )
+
+    emitted = []
+
+    service.offline_operation_queued.connect(
+        lambda: emitted.append(True)
+    )
+
+    with pytest.raises(ConnectionError):
+        service.get_location_by_postal_code("01000")
+
+    assert emitted == [True]
+
+def test_sync_postal_code_operation_marks_operation_as_synced(
+    tmp_path: Path,
+) -> None:
+    class FakeAddressApiClient:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            return {
+                "city": "Álvaro Obregón",
+                "state": "Ciudad de México",
+            }
+
+    service = ShipmentService(
+        tmp_path / "test.db",
+        address_api_client=FakeAddressApiClient(),  # type: ignore[arg-type]
+    )
+
+    operation = service.offline_operation_service.queue_operation(
+        operation="postal_code_lookup",
+        payload="01000",
+    )
+
+    result = service.sync_postal_code_operation(
+        operation.id,
+        operation.payload,
+    )
+
+    assert result == {
+        "city": "Álvaro Obregón",
+        "state": "Ciudad de México",
+    }
+
+    assert (
+        service.offline_operation_service
+        .get_pending_operations()
+        == []
+    )
+
+def test_sync_pending_postal_code_operations(
+    tmp_path: Path,
+) -> None:
+    class FakeAddressApiClient:
+        def get_location_by_postal_code(
+            self,
+            postal_code: str,
+        ) -> dict[str, str]:
+            return {
+                "city": "Ciudad de México",
+                "state": "Ciudad de México",
+            }
+
+    service = ShipmentService(
+        tmp_path / "test.db",
+        address_api_client=FakeAddressApiClient(),  # type: ignore[arg-type]
+    )
+
+    service.queue_postal_code_lookup("01000")
+
+    synchronized = (
+        service.sync_pending_postal_code_operations()
+    )
+
+    assert synchronized == 1
+    assert service.offline_operation_service.get_pending_operations() == []

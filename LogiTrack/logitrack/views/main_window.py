@@ -1,4 +1,6 @@
 from PyQt6.QtCore import Qt, QThread
+
+from logitrack.services.offline_sync_worker import OfflineSyncWorker
 from logitrack.ui.theme import get_theme
 from logitrack.services.worker import ShipmentWorker
 from logitrack.services.postal_code_worker import PostalCodeWorker
@@ -48,6 +50,10 @@ class MainWindow(QMainWindow):
 
         self.offline_view_model.operations_changed.connect(
             self._update_offline_status
+        )
+
+        self.view_model.connect_offline_notifications(
+            self.offline_view_model.refresh
         )
 
     def _create_ui(self) -> None:
@@ -178,6 +184,7 @@ class MainWindow(QMainWindow):
         self.async_button = QPushButton(
             "Probar tarea asíncrona"
         )
+        self.sync_button = QPushButton("Sincronizar")
         self.theme_button = QPushButton("🌙 Modo oscuro")
         self.theme_button.setCheckable(True)
 
@@ -187,6 +194,7 @@ class MainWindow(QMainWindow):
         buttons_layout.addWidget(
             self.postal_code_button
         )
+        buttons_layout.addWidget(self.sync_button)
 
         form_layout.addRow(buttons_layout)
         form_layout.addRow(self.async_button)
@@ -222,9 +230,10 @@ class MainWindow(QMainWindow):
             self._search_postal_code
         )
         self.async_button.clicked.connect(
-
             self._start_async_operation
-
+        )
+        self.sync_button.clicked.connect(
+            self._start_offline_sync
         )
 
     def _search_postal_code(self) -> None:
@@ -475,4 +484,79 @@ class MainWindow(QMainWindow):
 
         self.offline_status_label.setText(
             f"Pendientes offline: {pending}"
+        )
+
+    def _start_offline_sync(self) -> None:
+        """Inicia la sincronización de operaciones offline."""
+
+        self.sync_button.setEnabled(False)
+
+        self.statusBar().showMessage(
+            "Sincronizando operaciones pendientes..."
+        )
+
+        self.sync_thread = QThread()
+
+        self.sync_worker = OfflineSyncWorker(
+            self.controller.get_service()
+        )
+
+        self.sync_worker.moveToThread(
+            self.sync_thread
+        )
+
+        self.sync_thread.started.connect(
+            self.sync_worker.run
+        )
+
+        self.sync_worker.finished.connect(
+            self._offline_sync_finished
+        )
+
+        self.sync_worker.error.connect(
+            self._offline_sync_error
+        )
+
+        self.sync_worker.finished.connect(
+            self.sync_thread.quit
+        )
+
+        self.sync_worker.error.connect(
+            self.sync_thread.quit
+        )
+
+        self.sync_thread.finished.connect(
+            self.sync_worker.deleteLater
+        )
+
+        self.sync_thread.finished.connect(
+            self.sync_thread.deleteLater
+        )
+
+        self.sync_thread.start()
+
+    def _offline_sync_finished(
+            self,
+            synchronized: int,
+    ) -> None:
+        """Procesa el resultado de la sincronización."""
+
+        self.sync_button.setEnabled(True)
+
+        self.offline_view_model.refresh()
+
+        self.statusBar().showMessage(
+            f"{synchronized} operación(es) sincronizada(s)."
+        )
+
+    def _offline_sync_error(
+            self,
+            message: str,
+    ) -> None:
+        """Procesa un error de sincronización."""
+
+        self.sync_button.setEnabled(True)
+
+        self.statusBar().showMessage(
+            f"Error de sincronización: {message}"
         )

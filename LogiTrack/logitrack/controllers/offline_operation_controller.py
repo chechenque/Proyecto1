@@ -42,3 +42,4 @@ class OfflineOperationController:
         """Marca una operación como sincronizada."""
 
         self.service.mark_as_synced(operation_id)
+

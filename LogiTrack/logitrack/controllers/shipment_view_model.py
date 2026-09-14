@@ -82,3 +82,13 @@ class ShipmentViewModel(QObject):
             postal_code
         )
 
+    def connect_offline_notifications(
+            self,
+            callback,
+    ) -> None:
+        """Conecta las notificaciones de operaciones offline."""
+
+        self.controller.service.offline_operation_queued.connect(
+            callback
+        )
+

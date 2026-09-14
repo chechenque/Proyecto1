@@ -9,8 +9,10 @@ from logitrack.services.offline_operation_service import (
 )
 
 
-class ShipmentService:
+class ShipmentService(QObject):
     """Servicios relacionados con la gestión de envíos."""
+
+    offline_operation_queued = pyqtSignal()
 
     def __init__(
             self,
@@ -18,6 +20,7 @@ class ShipmentService:
             address_api_client: AddressApiClient | None = None,
             offline_operation_service: OfflineOperationService | None = None,
     ) -> None:
+        super().__init__()
         if database_path is None:
             database_path = DATABASE_PATH
 
@@ -69,7 +72,7 @@ class ShipmentService:
 
     def simulate_long_operation(
             self,
-            delay: float = 5.0,
+            delay: float = 1.0,
     ) -> str:
         """Simula una operación que tarda algunos segundos."""
         import time
@@ -102,3 +105,65 @@ class ShipmentService:
             operation="postal_code_lookup",
             payload=postal_code,
         )
+
+        self.offline_operation_queued.emit()
+
+    def sync_postal_code_operation(
+            self,
+            operation_id: int,
+            postal_code: str,
+    ) -> dict[str, str]:
+        """Sincroniza una consulta de código postal pendiente."""
+
+        result = self.get_location_by_postal_code(
+            postal_code
+        )
+
+        self.offline_operation_service.mark_as_synced(
+            operation_id
+        )
+
+        return
+
+    def sync_postal_code_operation(
+            self,
+            operation_id: int,
+            postal_code: str,
+    ) -> dict[str, str]:
+        """Sincroniza una consulta de código postal pendiente."""
+
+        result = self.address_api_client.get_location_by_postal_code(
+            postal_code
+        )
+
+        self.offline_operation_service.mark_as_synced(
+            operation_id
+        )
+
+        return result
+
+    def sync_pending_postal_code_operations(self) -> int:
+        """Intenta sincronizar todas las consultas de CP pendientes."""
+
+        synchronized = 0
+
+        operations = (
+            self.offline_operation_service
+            .get_pending_operations()
+        )
+
+        for operation in operations:
+            if operation.operation != "postal_code_lookup":
+                continue
+
+            try:
+                self.sync_postal_code_operation(
+                    operation.id,
+                    operation.payload,
+                )
+            except ConnectionError:
+                continue
+
+            synchronized += 1
+
+        return synchronized
