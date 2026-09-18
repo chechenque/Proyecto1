@@ -1,9 +1,11 @@
+from pathlib import Path
+
+from PyQt6.QtCore import QObject, pyqtSignal
+
 from logitrack.config import DATABASE_PATH
 from logitrack.models.database import Database
 from logitrack.models.shipment_repository import ShipmentRepository
-from pathlib import Path
 from logitrack.services.address_api_client import AddressApiClient
-from PyQt6.QtCore import QObject, pyqtSignal
 from logitrack.services.offline_operation_service import (
     OfflineOperationService,
 )

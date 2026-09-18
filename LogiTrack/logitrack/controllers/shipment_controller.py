@@ -1,5 +1,6 @@
-from logitrack.services.shipment_service import ShipmentService
 from pydantic import ValidationError
+
+from logitrack.services.shipment_service import ShipmentService
 
 
 class ShipmentController:

@@ -4,8 +4,6 @@ from logitrack.services.shipment_service import ShipmentService
 from logitrack.services.worker import ShipmentWorker
 
 
-
-
 def test_worker_emits_finished() -> None:
     """El worker debe emitir finished al completar la operación."""
 

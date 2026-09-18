@@ -1,9 +1,4 @@
 from PyQt6.QtCore import Qt, QThread
-
-from logitrack.services.offline_sync_worker import OfflineSyncWorker
-from logitrack.ui.theme import get_theme
-from logitrack.services.worker import ShipmentWorker
-from logitrack.services.postal_code_worker import PostalCodeWorker
 from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
@@ -21,6 +16,12 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
+from logitrack.services.offline_sync_worker import OfflineSyncWorker
+from logitrack.services.postal_code_worker import PostalCodeWorker
+from logitrack.services.worker import ShipmentWorker
+from logitrack.ui.theme import get_theme
+from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QShortcut
 
 class MainWindow(QMainWindow):
     """Ventana principal de LogiTrack Desktop."""
@@ -41,6 +42,8 @@ class MainWindow(QMainWindow):
         self.offline_view_model = offline_view_model
 
         self._create_ui()
+
+        self._create_shortcuts()
 
         self.shipment_table.setModel(
             self.view_model.shipment_model
@@ -559,4 +562,46 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage(
             f"Error de sincronización: {message}"
+        )
+
+    def _create_shortcuts(self) -> None:
+        """Configura los atajos de teclado principales."""
+
+        save_shortcut = QShortcut(
+            QKeySequence("Ctrl+G"),
+            self,
+        )
+        save_shortcut.activated.connect(
+            self._save_shipment
+        )
+
+        clear_shortcut = QShortcut(
+            QKeySequence("Ctrl+L"),
+            self,
+        )
+        clear_shortcut.activated.connect(
+            self._clear_form
+        )
+
+        search_shortcut = QShortcut(
+            QKeySequence("Ctrl+B"),
+            self,
+        )
+        search_shortcut.activated.connect(
+            self._search_shipments
+        )
+
+        theme_shortcut = QShortcut(
+            QKeySequence("Ctrl+M"),
+            self,
+        )
+        theme_shortcut.activated.connect(
+            self._toggle_theme_shortcut
+        )
+
+    def _toggle_theme_shortcut(self) -> None:
+        """Alterna el tema mediante el atajo de teclado."""
+
+        self.theme_button.setChecked(
+            not self.theme_button.isChecked()
         )

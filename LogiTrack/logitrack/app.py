@@ -1,36 +1,16 @@
 import sys
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtCore import QThread
+from PyQt6.QtWidgets import (
+    QApplication,
+)
 
 from logitrack.controllers.offline_operation_controller import OfflineOperationController
 from logitrack.controllers.offline_operation_view_model import OfflineOperationViewModel
-from logitrack.controllers.shipment_view_model import ShipmentViewModel
-from logitrack.services.shipment_service import ShipmentService
-from logitrack.services.worker import ShipmentWorker
-from logitrack.models.shipment_table_model import ShipmentTableModel
 from logitrack.controllers.shipment_controller import ShipmentController
-from logitrack.views.main_window import MainWindow
+from logitrack.controllers.shipment_view_model import ShipmentViewModel
+from logitrack.models.shipment_table_model import ShipmentTableModel
 from logitrack.ui.theme import get_theme
-from PyQt6.QtWidgets import (
-    QApplication,
-    QCheckBox,
-    QPushButton,
-    QComboBox,
-    QFormLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QPushButton,
-    QSizePolicy,
-    QSplitter,
-    QTableView,
-    QVBoxLayout,
-    QWidget,
-)
-
+from logitrack.views.main_window import MainWindow
 
 
 def run() -> None:

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from logitrack.models.offline_operation import OfflineOperation
 from logitrack.services.offline_operation_service import (
     OfflineOperationService,

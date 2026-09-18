@@ -1,7 +1,6 @@
-from logitrack.models.database import Database
-from logitrack.models.shipment import Shipment
 import sqlite3
 
+from logitrack.models.database import Database
 from logitrack.models.shipment import Shipment
 
 
