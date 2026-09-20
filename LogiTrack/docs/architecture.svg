@@ -1,0 +1,325 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200"
+     height="850"
+     viewBox="0 0 1200 850">
+
+  <defs>
+    <marker id="arrow"
+            markerWidth="10"
+            markerHeight="10"
+            refX="9"
+            refY="3"
+            orient="auto"
+            markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
+    </marker>
+
+    <style>
+      .title {
+        font-family: Arial, sans-serif;
+        font-size: 30px;
+        font-weight: bold;
+        fill: #222;
+      }
+
+      .layer-title {
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        font-weight: bold;
+        fill: #222;
+      }
+
+      .description {
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        fill: #444;
+      }
+
+      .box {
+        stroke: #333;
+        stroke-width: 2;
+        rx: 12;
+        ry: 12;
+      }
+
+      .arrow {
+        stroke: #333;
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+
+      .dashed {
+        stroke-dasharray: 8 6;
+      }
+    </style>
+  </defs>
+
+  <rect width="1200" height="850" fill="#ffffff"/>
+
+  <text x="600"
+        y="50"
+        text-anchor="middle"
+        class="title">
+    LogiTrack Desktop — Arquitectura
+  </text>
+
+  <!-- VIEW -->
+  <rect x="400"
+        y="90"
+        width="400"
+        height="80"
+        class="box"
+        fill="#e8f0fe"/>
+
+  <text x="600"
+        y="120"
+        text-anchor="middle"
+        class="layer-title">
+    View
+  </text>
+
+  <text x="600"
+        y="148"
+        text-anchor="middle"
+        class="description">
+    PyQt6 · MainWindow · Widgets · QTableView
+  </text>
+
+  <!-- VIEWMODEL -->
+  <rect x="400"
+        y="210"
+        width="400"
+        height="80"
+        class="box"
+        fill="#e6f4ea"/>
+
+  <text x="600"
+        y="240"
+        text-anchor="middle"
+        class="layer-title">
+    ViewModel
+  </text>
+
+  <text x="600"
+        y="268"
+        text-anchor="middle"
+        class="description">
+    Estado de presentación · actualización de modelos
+  </text>
+
+  <!-- CONTROLLER -->
+  <rect x="400"
+        y="330"
+        width="400"
+        height="80"
+        class="box"
+        fill="#fef7e0"/>
+
+  <text x="600"
+        y="360"
+        text-anchor="middle"
+        class="layer-title">
+    Controller
+  </text>
+
+  <text x="600"
+        y="388"
+        text-anchor="middle"
+        class="description">
+    Coordinación de operaciones
+  </text>
+
+  <!-- SERVICE -->
+  <rect x="400"
+        y="450"
+        width="400"
+        height="90"
+        class="box"
+        fill="#fce8e6"/>
+
+  <text x="600"
+        y="482"
+        text-anchor="middle"
+        class="layer-title">
+    Service
+  </text>
+
+  <text x="600"
+        y="510"
+        text-anchor="middle"
+        class="description">
+    Lógica de aplicación · validación · integración
+  </text>
+
+  <!-- REPOSITORY -->
+  <rect x="400"
+        y="590"
+        width="400"
+        height="80"
+        class="box"
+        fill="#f3e8fd"/>
+
+  <text x="600"
+        y="620"
+        text-anchor="middle"
+        class="layer-title">
+    Repository
+  </text>
+
+  <text x="600"
+        y="648"
+        text-anchor="middle"
+        class="description">
+    Acceso y persistencia de datos
+  </text>
+
+  <!-- SQLITE -->
+  <rect x="400"
+        y="720"
+        width="400"
+        height="80"
+        class="box"
+        fill="#e0f2f1"/>
+
+  <text x="600"
+        y="750"
+        text-anchor="middle"
+        class="layer-title">
+    SQLite
+  </text>
+
+  <text x="600"
+        y="778"
+        text-anchor="middle"
+        class="description">
+    Base de datos local
+  </text>
+
+  <!-- MAIN FLOW ARROWS -->
+  <line x1="600" y1="170"
+        x2="600" y2="210"
+        class="arrow"/>
+
+  <line x1="600" y1="290"
+        x2="600" y2="330"
+        class="arrow"/>
+
+  <line x1="600" y1="410"
+        x2="600" y2="450"
+        class="arrow"/>
+
+  <line x1="600" y1="540"
+        x2="600" y2="590"
+        class="arrow"/>
+
+  <line x1="600" y1="670"
+        x2="600" y2="720"
+        class="arrow"/>
+
+  <!-- ASYNC -->
+  <rect x="40"
+        y="430"
+        width="270"
+        height="100"
+        class="box"
+        fill="#eeeeee"/>
+
+  <text x="175"
+        y="460"
+        text-anchor="middle"
+        class="layer-title">
+    QThread / Workers
+  </text>
+
+  <text x="175"
+        y="490"
+        text-anchor="middle"
+        class="description">
+    Operaciones prolongadas
+  </text>
+
+  <text x="175"
+        y="515"
+        text-anchor="middle"
+        class="description">
+    sin bloquear la UI
+  </text>
+
+  <line x1="310"
+        y1="480"
+        x2="400"
+        y2="495"
+        class="arrow dashed"/>
+
+  <!-- HTTP API -->
+  <rect x="890"
+        y="420"
+        width="270"
+        height="100"
+        class="box"
+        fill="#eeeeee"/>
+
+  <text x="1025"
+        y="450"
+        text-anchor="middle"
+        class="layer-title">
+    API HTTP
+  </text>
+
+  <text x="1025"
+        y="480"
+        text-anchor="middle"
+        class="description">
+    Consulta de códigos
+  </text>
+
+  <text x="1025"
+        y="505"
+        text-anchor="middle"
+        class="description">
+    postales
+  </text>
+
+  <line x1="800"
+        y1="495"
+        x2="890"
+        y2="470"
+        class="arrow dashed"/>
+
+  <!-- OFFLINE -->
+  <rect x="890"
+        y="570"
+        width="270"
+        height="100"
+        class="box"
+        fill="#eeeeee"/>
+
+  <text x="1025"
+        y="600"
+        text-anchor="middle"
+        class="layer-title">
+    Offline Service
+  </text>
+
+  <text x="1025"
+        y="630"
+        text-anchor="middle"
+        class="description">
+    Cola de operaciones
+  </text>
+
+  <text x="1025"
+        y="655"
+        text-anchor="middle"
+        class="description">
+    y sincronización
+  </text>
+
+  <line x1="800"
+        y1="515"
+        x2="890"
+        y2="610"
+        class="arrow dashed"/>
+
+</svg>

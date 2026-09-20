@@ -61,7 +61,7 @@ PyInstaller	Empaquetado
 GitHub Actions	Integración continua
 Git	Control de versiones
 ```
-Arquitectura
+## Arquitectura
 
 LogiTrack Desktop utiliza una arquitectura por capas basada en la separación de responsabilidades:
 ```
@@ -100,7 +100,7 @@ LogiTrack Desktop utiliza una arquitectura por capas basada en la separación de
 │       Base de datos local    │
 └──────────────────────────────┘
 ```
-Responsabilidades
+### Responsabilidades
 
 View
 
@@ -167,9 +167,13 @@ Proyecto1/
 │
 └── README.md
 ```
-Instalación
+### Diagrama de arquitectura
 
-Requisitos
+![Arquitectura de LogiTrack Desktop](LogiTrack/docs/architecture.svg)
+
+## Instalación
+
+### Requisitos
 
 * Python 3.11 o superior.
 * Git.
