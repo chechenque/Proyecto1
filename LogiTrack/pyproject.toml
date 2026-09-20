@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logitrack"
+version = "1.0.0"
+description = "Aplicación de escritorio para gestión de envíos de LogiTrack."
+readme = "../README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic==2.13.5",
+    "PyQt6==6.11.0",
+    "httpx==0.28.1",
+]
+
+[project.scripts]
+logitrack = "logitrack.app:run"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 79
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

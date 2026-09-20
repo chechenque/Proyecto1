@@ -39,8 +39,8 @@ QComboBox QAbstractItemView {
 }
 
 QPushButton {
-    min-height: 34px;
-    padding: 5px 14px;
+    min-height: 40px;
+    padding: 4px 8px;
     background-color: #ffffff;
     color: #202124;
     border: 1px solid #c7cbd1;
@@ -124,8 +124,8 @@ QComboBox:focus {
 }
 
 QPushButton {
-    min-height: 32px;
-    padding: 4px 12px;
+    min-height: 40px;
+    padding: 4px 8px;
     background-color: #3c4043;
     color: #e8eaed;
     border: 1px solid #5f6368;

@@ -117,23 +117,6 @@ class ShipmentService(QObject):
     ) -> dict[str, str]:
         """Sincroniza una consulta de código postal pendiente."""
 
-        result = self.get_location_by_postal_code(
-            postal_code
-        )
-
-        self.offline_operation_service.mark_as_synced(
-            operation_id
-        )
-
-        return
-
-    def sync_postal_code_operation(
-            self,
-            operation_id: int,
-            postal_code: str,
-    ) -> dict[str, str]:
-        """Sincroniza una consulta de código postal pendiente."""
-
         result = self.address_api_client.get_location_by_postal_code(
             postal_code
         )

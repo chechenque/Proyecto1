@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PyQt6.QtGui import QColor
 
+
 class ShipmentTableModel(QAbstractTableModel):
     """Modelo de datos para la tabla de envíos."""
 

@@ -1,5 +1,7 @@
 from PyQt6.QtCore import Qt, QThread
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
+    QApplication,
     QComboBox,
     QFormLayout,
     QGroupBox,
@@ -13,15 +15,13 @@ from PyQt6.QtWidgets import (
     QTableView,
     QVBoxLayout,
     QWidget,
-    QApplication,
 )
 
 from logitrack.services.offline_sync_worker import OfflineSyncWorker
 from logitrack.services.postal_code_worker import PostalCodeWorker
 from logitrack.services.worker import ShipmentWorker
 from logitrack.ui.theme import get_theme
-from PyQt6.QtGui import QKeySequence
-from PyQt6.QtGui import QShortcut
+
 
 class MainWindow(QMainWindow):
     """Ventana principal de LogiTrack Desktop."""

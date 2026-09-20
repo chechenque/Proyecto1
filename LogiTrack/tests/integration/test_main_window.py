@@ -3,8 +3,12 @@ from pathlib import Path
 import pytest
 from PyQt6.QtWidgets import QApplication
 
-from logitrack.controllers.offline_operation_controller import OfflineOperationController
-from logitrack.controllers.offline_operation_view_model import OfflineOperationViewModel
+from logitrack.controllers.offline_operation_controller import (
+    OfflineOperationController,
+)
+from logitrack.controllers.offline_operation_view_model import (
+    OfflineOperationViewModel,
+)
 from logitrack.controllers.shipment_controller import (
     ShipmentController,
 )
