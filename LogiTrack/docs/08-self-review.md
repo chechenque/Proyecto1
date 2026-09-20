@@ -92,8 +92,8 @@
 - [x] Datos e integración API.
 - [x] Empaquetado.
 - [x] Autoevaluación final.
-- [ ] README final del proyecto.
-- [ ] Diagrama de arquitectura SVG.
+- [x] README final del proyecto.
+- [x] Diagrama de arquitectura SVG.
 
 ## 9. Bonificaciones implementadas
 
@@ -105,14 +105,10 @@
 
 ## 10. Pendientes finales
 
-1. Completar README principal.
-2. Crear diagrama de arquitectura.
-3. Revisar documentación completa.
-4. Ejecutar nuevamente toda la suite de pruebas.
-5. Verificar cobertura final.
-6. Revisar el funcionamiento de la aplicación desde cero.
-7. Realizar revisión final contra la rúbrica.
-8. Crear el commit final del proyecto.
+1. Revisar documentación completa.
+2. Revisar el funcionamiento de la aplicación desde cero.
+3. Realizar revisión final contra la rúbrica.
+4. Crear el commit final del proyecto.
 
 ## Conclusión
 
